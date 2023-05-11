@@ -14,13 +14,14 @@ export class ScheduleService {
 	}
 
 
-	getByRoomIdAndDate(roomId: string, date: Date): Promise<DocumentType<ScheduleModel>[] | null> {
+	async getByRoomIdAndDate(roomId: string, date: Date): Promise<DocumentType<ScheduleModel>[] | null> {
 		return this.scheduleModel.find({ roomId: new Types.ObjectId(roomId), date: date }).exec();
 	}
 
 
 	async create(dto: CreateScheduleDto): Promise<DocumentType<ScheduleModel>> {
-		if (await this.getByRoomIdAndDate(dto.roomId, dto.day)) {
+		const foundSchedules = await this.getByRoomIdAndDate(dto.roomId, dto.day);
+		if (foundSchedules.length > 0) {
 			throw new HttpException(SCHEDULE_EXISTS, HttpStatus.BAD_GATEWAY);
 		}
 		return this.scheduleModel.create(dto);
